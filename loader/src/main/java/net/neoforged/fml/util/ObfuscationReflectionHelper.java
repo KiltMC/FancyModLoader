@@ -116,7 +116,7 @@ public class ObfuscationReflectionHelper {
         Preconditions.checkNotNull(parameterTypes, "Parameter types of method to find cannot be null.");
 
         // Kilt: Remap method
-        var methodSet = KiltRemapper.INSTANCE.getSrgMappedMethods().getOrDefault(methodName, Collections.emptyMap()).get(KiltRemapper.INSTANCE.unmapClass(clazz.getName().replace(".", "/")));
+        var methodSet = KiltRemapper.INSTANCE.getMojMappedMethods().getOrDefault(methodName, Collections.emptyMap()).get(KiltRemapper.INSTANCE.unmapClass(clazz.getName().replace(".", "/")));
         StringBuilder descriptorBuilder = new StringBuilder("(");
 
         for (Class<?> parameterType : parameterTypes) {
@@ -198,7 +198,7 @@ public class ObfuscationReflectionHelper {
         Preconditions.checkArgument(!fieldName.isEmpty(), "Name of field to find cannot be empty.");
 
         // Kilt: Remap field
-        fieldName = KiltRemapper.INSTANCE.getSrgMappedFields().getOrDefault(fieldName, Collections.emptyMap()).getOrDefault(KiltRemapper.INSTANCE.unmapClass(clazz.getName().replace(".", "/")), fieldName);
+        fieldName = KiltRemapper.INSTANCE.getMojMappedFields().getOrDefault(fieldName, Collections.emptyMap()).getOrDefault(KiltRemapper.INSTANCE.unmapClass(clazz.getName().replace(".", "/")), fieldName);
 
         try {
             Field f = clazz.getDeclaredField(fieldName);
