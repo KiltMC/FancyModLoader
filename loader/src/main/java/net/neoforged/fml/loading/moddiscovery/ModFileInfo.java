@@ -106,6 +106,7 @@ public class ModFileInfo implements IModFileInfo, IConfigurable {
     public ModFileInfo(NeoForgeMod kiltMod) {
         this.config = kiltMod.getConfig();
         this.modFile = new ModFile(kiltMod, this);
+        this.modFile.setScanResult(kiltMod.getScanData(), null);
 
         // Kilt: copied from above
         // modloader is essential
