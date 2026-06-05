@@ -9,7 +9,6 @@ import static net.neoforged.fml.Logging.CORE;
 import static net.neoforged.fml.Logging.LOADING;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -27,21 +26,15 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.event.IModBusEvent;
-import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.fml.event.lifecycle.ParallelDispatchEvent;
 import net.neoforged.fml.i18n.FMLTranslations;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.ImmediateWindowHandler;
 import net.neoforged.fml.loading.LoadingModList;
-import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
-import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import net.neoforged.fml.loading.progress.StartupNotificationManager;
 import net.neoforged.neoforgespi.language.IModInfo;
 import net.neoforged.neoforgespi.language.IModLanguageLoader;
@@ -54,8 +47,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.VisibleForTesting;
 import xyz.bluspring.kilt.Kilt;
 import xyz.bluspring.kilt.loader.KiltLoader;
-import xyz.bluspring.kilt.loader.mod.NeoForgeMod;
-import xyz.bluspring.knit.loader.KnitLoader;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * Contains the logic to load mods, i.e. turn the {@link LoadingModList} into the {@link ModList},
@@ -246,7 +240,7 @@ public final class ModLoader {
 
                         // Build the future for this container
                         var future = CompletableFuture.allOf(depFutures)
-                                .<Void>handleAsync((void_, exception) -> {
+                                .<Void>handle((void_, exception) -> {
                                     if (exception != null) {
                                         // If there was any exception, short circuit.
                                         // The exception will already be handled by `waitForFuture` since it comes from another mod.
@@ -264,7 +258,7 @@ public final class ModLoader {
                                         ModLoadingContext.get().setActiveContainer(null);
                                     }
                                     return null;
-                                }, parallelExecutor);
+                                }/*, parallelExecutor*/); // Kilt: Race conditions with mod loading, probably not ideal.
                         modFutures.put(modContainer.getModInfo(), future);
                         return future;
                     })
