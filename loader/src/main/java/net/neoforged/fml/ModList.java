@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import kotlin.collections.CollectionsKt;
 import net.neoforged.fml.loading.LoadingModList;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
@@ -30,6 +31,7 @@ import net.neoforged.neoforgespi.language.ModFileScanData;
 import net.neoforged.neoforgespi.locating.IModFile;
 import xyz.bluspring.kilt.Kilt;
 import xyz.bluspring.kilt.loader.mod.NeoForgeMod;
+import xyz.bluspring.kilt.loader.mod.fabric.WrappedFabricModContainer;
 
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -199,7 +201,7 @@ public class ModList {
 
     public List<ModContainer> getSortedMods() {
 //        return sortedContainers;
-        return Kilt.Companion.getLoader().getMods().stream().map(NeoForgeMod::getContainer).map(e -> (ModContainer) e).toList();
+        return CollectionsKt.plus(WrappedFabricModContainer.getWrappedContainers(), Kilt.Companion.getLoader().getMods().stream().map(NeoForgeMod::getContainer).toList());
     }
 
     public void forEachModInOrder(Consumer<ModContainer> containerConsumer) {

@@ -85,11 +85,11 @@ public class ConfigTracker {
 
     // Kilt: because Forge Config API Port sucks
     public ModConfig registerConfig(ModConfig.Type type, IConfigSpec spec, String fabricModId) {
-        return registerConfig(type, spec, new WrappedFabricModContainer(FabricLoader.getInstance().getModContainer(fabricModId).orElseThrow()));
+        return registerConfig(type, spec, WrappedFabricModContainer.get(FabricLoader.getInstance().getModContainer(fabricModId).orElseThrow()));
     }
 
     public ModConfig registerConfig(ModConfig.Type type, IConfigSpec spec, String fabricModId, String fileName) {
-        return registerConfig(type, spec, new WrappedFabricModContainer(FabricLoader.getInstance().getModContainer(fabricModId).orElseThrow()), fileName);
+        return registerConfig(type, spec, WrappedFabricModContainer.get(FabricLoader.getInstance().getModContainer(fabricModId).orElseThrow()), fileName);
     }
 
     /**
