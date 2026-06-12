@@ -5,8 +5,6 @@
 
 package net.neoforged.fml.loading;
 
-import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -21,12 +19,16 @@ import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.IModuleLayerManager.Layer;
 import net.neoforged.fml.loading.progress.ProgressMeter;
 import net.neoforged.fml.loading.progress.StartupNotificationManager;
 import net.neoforged.neoforgespi.earlywindow.GraphicsBootstrapper;
 import net.neoforged.neoforgespi.earlywindow.ImmediateWindowProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xyz.bluspring.kilt.Kilt;
 
 public class ImmediateWindowHandler {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -100,8 +102,7 @@ public class ImmediateWindowHandler {
 
     public static String getGLVersion() {
 //        return provider.getGLVersion();
-        // TODO: should probably make this better i'm ngl
-        return "4.6";
+        return Kilt.Companion.getLoader().getOpenGlVersionString();
     }
 
     public static void updateProgress(final String message) {
