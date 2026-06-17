@@ -116,7 +116,7 @@ public class ObfuscationReflectionHelper {
         Preconditions.checkNotNull(parameterTypes, "Parameter types of method to find cannot be null.");
 
         // Kilt: Remap method
-        var methodSet = KiltRemapper.INSTANCE.getMojMappedMethods().getOrDefault(methodName, Collections.emptyMap()).get(KiltRemapper.INSTANCE.unmapClass(clazz.getName().replace(".", "/")));
+        var methodSet = KiltRemapper.INSTANCE.getMojMappedMethods().getOrDefault(methodName, Collections.emptyMap()).getOrDefault(KiltRemapper.INSTANCE.unmapClass(clazz.getName().replace(".", "/")), Collections.emptySet());
         StringBuilder descriptorBuilder = new StringBuilder("(");
 
         for (Class<?> parameterType : parameterTypes) {
