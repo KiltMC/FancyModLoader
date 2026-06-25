@@ -5,7 +5,6 @@
 
 package net.neoforged.fml.loading.moddiscovery;
 
-import com.mojang.logging.LogUtils;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +12,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.StringSubstitutor;
 import net.neoforged.fml.loading.StringUtils;
 import net.neoforged.neoforgespi.language.IConfigurable;
@@ -25,6 +26,10 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.slf4j.Logger;
+import xyz.bluspring.kilt.loader.mod.NeoForgeMod;
+import xyz.bluspring.kilt.loader.mod.fabric.FabricModFileInfoWrapper;
+
+import net.fabricmc.loader.api.ModContainer;
 
 public class ModInfo implements IModInfo, IConfigurable {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -48,6 +53,42 @@ public class ModInfo implements IModInfo, IConfigurable {
     private final Map<String, Object> properties;
     private final IConfigurable config;
     private final Optional<URL> modUrl;
+
+    // Kilt: Map to Kilt's loaded info
+    public ModInfo(final NeoForgeMod kiltModInfo) {
+        this.owningFile = new ModFileInfo(kiltModInfo);
+        this.modId = kiltModInfo.getModId();
+        this.namespace = kiltModInfo.getNamespace();
+        this.version = kiltModInfo.getVersion();
+        this.displayName = kiltModInfo.getDisplayName();
+        this.description = kiltModInfo.getDescription();
+        this.logoFile = kiltModInfo.getLogoFile();
+        this.logoBlur = kiltModInfo.getLogoBlur();
+        this.updateJSONURL = kiltModInfo.getUpdateURL();
+        this.dependencies = kiltModInfo.getDependencies();
+        this.features = kiltModInfo.getForgeFeatures();
+        this.properties = kiltModInfo.getModProperties();
+        this.config = kiltModInfo.getConfig();
+        this.modUrl = kiltModInfo.getModURL();
+    }
+
+    // Kilt: Map to Fabric's loaded info.
+    public ModInfo(final ModContainer fabricModContainer) {
+        this.owningFile = new ModFileInfo(new FabricModFileInfoWrapper(fabricModContainer));
+        this.modId = fabricModContainer.getMetadata().getId();
+        this.namespace = fabricModContainer.getMetadata().getId();
+        this.version = new DefaultArtifactVersion(fabricModContainer.getMetadata().getVersion().getFriendlyString());
+        this.displayName = fabricModContainer.getMetadata().getName();
+        this.description = fabricModContainer.getMetadata().getDescription();
+        this.logoFile = fabricModContainer.getMetadata().getIconPath(64);
+        this.logoBlur = false;
+        this.updateJSONURL = Optional.empty();
+        this.dependencies = Collections.emptyList();
+        this.features = Collections.emptyList();
+        this.properties = Collections.emptyMap();
+        this.config = null; // Kilt TODO: this probably shouldn't be nullable.
+        this.modUrl = Optional.empty();
+    }
 
     public ModInfo(ModFileInfo owningFile, IConfigurable config) {
         Optional<ModFileInfo> ownFile = Optional.ofNullable(owningFile);

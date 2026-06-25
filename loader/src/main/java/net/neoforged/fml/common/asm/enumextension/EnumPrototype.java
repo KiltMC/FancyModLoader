@@ -5,22 +5,24 @@
 
 package net.neoforged.fml.common.asm.enumextension;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 import javax.lang.model.SourceVersion;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.jarcontents.JarResource;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.objectweb.asm.Type;
 
-record EnumPrototype(String owningMod, String enumName, String fieldName, String ctorDesc, String fullCtorDesc, EnumParameters ctorParams) implements Comparable<EnumPrototype> {
+public record EnumPrototype(String owningMod, String enumName, String fieldName, String ctorDesc, String fullCtorDesc, EnumParameters ctorParams) implements Comparable<EnumPrototype> {
 
     private static final String ENUM_CTOR_BASE_DESC = "Ljava/lang/String;I";
     private static final Gson GSON = new Gson();
@@ -30,7 +32,7 @@ record EnumPrototype(String owningMod, String enumName, String fieldName, String
         return comp != 0 ? comp : fieldName.compareTo(other.fieldName);
     }
 
-    static List<EnumPrototype> load(IModInfo mod, JarResource resource) {
+    public static List<EnumPrototype> load(IModInfo mod, JarResource resource) {
         try (Reader reader = resource.bufferedReader()) {
             JsonObject json = GSON.fromJson(reader, JsonObject.class);
 

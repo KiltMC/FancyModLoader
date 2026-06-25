@@ -5,7 +5,6 @@
 
 package net.neoforged.fml.loading.moddiscovery;
 
-import com.mojang.logging.LogUtils;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,8 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.LogMarkers;
 import net.neoforged.fml.loading.StringUtils;
 import net.neoforged.neoforgespi.language.IConfigurable;
@@ -24,6 +26,7 @@ import net.neoforged.neoforgespi.language.MavenVersionAdapter;
 import net.neoforged.neoforgespi.locating.InvalidModFileException;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
+import xyz.bluspring.kilt.loader.mod.NeoForgeMod;
 
 public class ModFileInfo implements IModFileInfo, IConfigurable {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -83,6 +86,65 @@ public class ModFileInfo implements IModFileInfo, IConfigurable {
                     this.mods.stream().map(IModInfo::getModId).collect(Collectors.joining(",", "{", "}")),
                     this.mods.stream().map(IModInfo::getVersion).map(Objects::toString).collect(Collectors.joining(",", "{", "}")));
         }
+    }
+
+    // Kilt: Initialize from Kilt's info
+    @ApiStatus.Internal
+    public ModFileInfo(NeoForgeMod kiltMod) {
+        this.config = kiltMod.getConfig();
+        this.modFile = new ModFile(kiltMod, this);
+        this.modFile.futureScanResult = CompletableFuture.completedFuture(kiltMod.getScanData());
+
+        // Kilt: copied from above
+        var modLoader = config.<String>getConfigElement("modLoader").orElse(null);
+        var modLoaderVersion = config.<String>getConfigElement("loaderVersion")
+            .map(MavenVersionAdapter::createFromVersionSpec)
+            .orElse(null);
+        if (modLoaderVersion != null && modLoader == null) {
+            throw new InvalidModFileException("You cannot specify a loaderVersion without specifying a modLoader", this);
+        }
+        this.languageSpecs = new ArrayList<>(List.of(new LanguageSpec(modLoader, modLoaderVersion)));
+        // the remaining properties are optional with sensible defaults
+        this.license = config.<String>getConfigElement("license")
+            .orElse("");
+        // Validate the license is set. Only apply this validation to mods.
+        if (this.license.isBlank()) {
+            throw new InvalidModFileException("Missing license", this);
+        }
+        this.showAsResourcePack = config.<Boolean>getConfigElement("showAsResourcePack")
+            .orElse(false);
+        this.showAsDataPack = config.<Boolean>getConfigElement("showAsDataPack")
+            .orElse(false);
+        this.usesServices = config.<List<String>>getConfigElement("services")
+            .orElse(List.of());
+        this.properties = config.<Map<String, Object>>getConfigElement("properties")
+            .orElse(Collections.emptyMap());
+        this.modFile.setFileProperties(this.properties);
+        this.issueURL = config.<String>getConfigElement("issueTrackerURL")
+            .map(StringUtils::toURL)
+            .orElse(null);
+        List<? extends IConfigurable> modConfigs = config.getConfigList("mods");
+        if (modConfigs.isEmpty()) {
+            throw new InvalidModFileException("Missing mods list", this);
+        }
+        this.mods = modConfigs.stream()
+            .map(mi -> (IModInfo) new ModInfo(this, mi))
+            .toList();
+    }
+
+    // Kilt: Copy from existing mod file info.
+    @ApiStatus.Internal
+    public ModFileInfo(IModFileInfo info) {
+        this.config = info.getConfig();
+        this.modFile = new ModFile(info.getFile());
+        this.issueURL = null;
+        this.languageSpecs = info.requiredLanguageLoaders();
+        this.showAsResourcePack = info.showAsResourcePack();
+        this.showAsDataPack = info.showAsDataPack();
+        this.mods = info.getMods();
+        this.properties = info.getFileProperties();
+        this.license = info.getLicense();
+        this.usesServices = info.usesServices();
     }
 
     public ModFileInfo(ModFile file, IConfigurable config, Consumer<IModFileInfo> configFileConsumer, List<LanguageSpec> languageSpecs) {

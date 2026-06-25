@@ -5,11 +5,10 @@
 
 package net.neoforged.fml.loading.moddiscovery;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.lang.module.ModuleDescriptor;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +19,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.stream.Stream;
+
+import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.jarmoduleinfo.JarModuleInfo;
 import net.neoforged.fml.loading.FMLLoader;
@@ -38,6 +41,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+import xyz.bluspring.kilt.loader.mod.NeoForgeMod;
 
 @ApiStatus.Internal
 public class ModFile implements IModFile {
@@ -58,7 +62,7 @@ public class ModFile implements IModFile {
     private final List<ModFileParser.MixinConfig> mixinConfigs;
     private final List<String> accessTransformers;
     @Nullable
-    private CompletableFuture<ModFileScanData> futureScanResult;
+    public CompletableFuture<ModFileScanData> futureScanResult; // Kilt: Made public
 
     public static final Attributes.Name TYPE = new Attributes.Name("FMLModType");
 
@@ -108,6 +112,51 @@ public class ModFile implements IModFile {
             this.mixinConfigs = List.of();
             this.accessTransformers = List.of();
         }
+    }
+
+    // Kilt: Copy from existing NeoForge mod.
+    @ApiStatus.Internal
+    public ModFile(NeoForgeMod kiltMod, ModFileInfo info) {
+        this.id = kiltMod.getModId();
+        this.jarVersion = kiltMod.getVersion().toString();
+        this.contents = kiltMod.getJarContents().get();
+        this.jarModuleInfo = JarModuleInfo.from(this.contents);
+
+        if (kiltMod.getManifest() != null && kiltMod.getManifest().getMainAttributes() != null) {
+            var library = kiltMod.getManifest().getMainAttributes().get("FMLLIBRARY");
+            if (library != null && library instanceof String str) {
+                this.modFileType = Type.valueOf(str);
+            } else {
+                this.modFileType = Type.MOD;
+            }
+        } else {
+            this.modFileType = Type.MOD;
+        }
+
+        this.modFileInfo = info;
+        this.mixinConfigs = kiltMod.getDefinition().getMixinConfigs().stream().map(e -> new ModFileParser.MixinConfig(e.getConfig(), List.of(), null)).toList();
+        this.accessTransformers = kiltMod.getAccessTransformers();
+    }
+
+    // Kilt: Copy from an implementing interface.
+    @ApiStatus.Internal
+    public ModFile(IModFile existingFile) {
+        this.id = existingFile.getId();
+        this.contents = existingFile.getContents();
+        this.jarModuleInfo = JarModuleInfo.from(this.contents);
+
+        Manifest manifest;
+        if (existingFile.getContents() != null) {
+            manifest = existingFile.getContents().getManifest();
+        } else {
+            manifest = new Manifest();
+        }
+
+        this.modFileType = existingFile.getType();
+        this.jarVersion = Optional.ofNullable(manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION)).orElse("0.0NONE");
+        this.modFileInfo = existingFile.getModFileInfo();
+        this.mixinConfigs = existingFile instanceof ModFile file ? file.getMixinConfigs() : new ArrayList<>();
+        this.accessTransformers = existingFile instanceof ModFile file ? file.getAccessTransformers() : new ArrayList<>();
     }
 
     @Override

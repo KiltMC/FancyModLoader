@@ -5,10 +5,7 @@
 
 package net.neoforged.fml.loading;
 
-import com.mojang.logging.LogUtils;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleDescriptor;
@@ -37,7 +34,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.neoforged.accesstransformer.api.AccessTransformerEngine;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.FMLVersion;
 import net.neoforged.fml.IBindingsProvider;
@@ -52,7 +50,6 @@ import net.neoforged.fml.classloading.transformation.ClassProcessorAuditLog;
 import net.neoforged.fml.classloading.transformation.ClassProcessorAuditSource;
 import net.neoforged.fml.classloading.transformation.ClassProcessorSet;
 import net.neoforged.fml.classloading.transformation.TransformingClassLoader;
-import net.neoforged.fml.common.asm.AccessTransformerService;
 import net.neoforged.fml.common.asm.SimpleProcessorsGroup;
 import net.neoforged.fml.common.asm.enumextension.RuntimeEnumExtender;
 import net.neoforged.fml.i18n.FMLTranslations;
@@ -91,6 +88,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
+import xyz.bluspring.kilt.loader.asm.InactiveClassProcessor;
 
 public final class FMLLoader implements AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -452,6 +450,7 @@ public final class FMLLoader implements AutoCloseable {
     }
 
     private static ClassProcessor createAccessTransformerService(DiscoveryResult discoveryResult) {
+        /*
         var engine = AccessTransformerEngine.newEngine();
         for (var modFile : discoveryResult.gameContent()) {
             for (var atPath : modFile.getAccessTransformers()) {
@@ -469,6 +468,8 @@ public final class FMLLoader implements AutoCloseable {
             }
         }
         return new AccessTransformerService(engine);
+         */
+        return InactiveClassProcessor.INSTANCE; // Kilt: We're handling the access transformer ourselves
     }
 
     private TransformingClassLoader buildTransformingLoader(ClassProcessorSet classProcessorSet,

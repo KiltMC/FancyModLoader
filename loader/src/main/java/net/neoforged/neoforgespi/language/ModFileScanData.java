@@ -42,6 +42,11 @@ public class ModFileScanData {
         return this.modFiles;
     }
 
+    public void kilt$copyFrom(ModFileScanData scanData) {
+        this.annotations.addAll(scanData.annotations);
+        this.classes.addAll(scanData.classes);
+    }
+
     public record ClassData(Type clazz, Type parent, Set<Type> interfaces) {}
 
     public record AnnotationData(Type annotationType, ElementType targetType, Type clazz, String memberName, Map<String, Object> annotationData) {}
