@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
+/* // Kilt: We're handling this ourselves
 package net.neoforged.fml.loading.moddiscovery.locators;
 
 import com.mojang.logging.LogUtils;
@@ -151,6 +152,7 @@ public class JarInJarDependencyLocator implements IDependencyLocator {
      * Atomically moves the extracted embedded jar file to its final location.
      * If an atomic move is not supported, the file will be moved normally.
      */
+    /*
     private static void moveExtractedFileIntoPlace(Path source, Path destination) {
         try {
             Files.createDirectories(destination.getParent());
@@ -236,3 +238,4 @@ public class JarInJarDependencyLocator implements IDependencyLocator {
         return "jarinjar";
     }
 }
+*/

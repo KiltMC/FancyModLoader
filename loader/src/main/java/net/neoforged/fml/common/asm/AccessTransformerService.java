@@ -2,7 +2,7 @@
  * Copyright (c) NeoForged and contributors
  * SPDX-License-Identifier: LGPL-2.1-only
  */
-
+/* // Kilt: We're handling this ourselves
 package net.neoforged.fml.common.asm;
 
 import java.util.Set;
@@ -40,3 +40,4 @@ public class AccessTransformerService implements ClassProcessor {
         return !context.empty() && engine.getTargets().contains(context.type());
     }
 }
+*/
