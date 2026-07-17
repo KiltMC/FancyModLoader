@@ -134,7 +134,12 @@ public class ModList {
 
     public Optional<? extends ModContainer> getModContainerById(String modId) {
         // Kilt: Point to loader
-        return Optional.ofNullable(Kilt.Companion.getLoader().getMod(modId)).map(NeoForgeMod::getContainer);
+        if (Kilt.Companion.getLoader().getNeoForgeToFabricMods().containsKey(modId))
+            return FabricLoader.getInstance().getModContainer(Kilt.Companion.getLoader().getNeoForgeToFabricMods().get(modId)).map(WrappedFabricModContainer::get);
+
+        return Optional.ofNullable(Kilt.Companion.getLoader().getMod(modId)).map(NeoForgeMod::getContainer)
+            .or(() -> FabricLoader.getInstance().getModContainer(modId).map(WrappedFabricModContainer::get))
+            .or(() -> FabricLoader.getInstance().getModContainer(modId.replace("_", "-")).map(WrappedFabricModContainer::get));
 //        return Optional.ofNullable(this.indexedMods.get(modId));
     }
 
