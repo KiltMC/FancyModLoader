@@ -64,7 +64,6 @@ import net.neoforged.fml.loading.mixin.MixinFacade;
 import net.neoforged.fml.loading.moddiscovery.ModDiscoverer;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
-import net.neoforged.fml.loading.moddiscovery.locators.GameLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.InDevFolderLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.InDevJarLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.NeoForgeDevDistCleaner;
@@ -115,7 +114,7 @@ public final class FMLLoader implements AutoCloseable {
     private final List<AutoCloseable> closeCallbacks = new ArrayList<>();
     private final ProgramArgs programArgs;
 
-    private LanguageProviderLoader languageProviderLoader;
+    public LanguageProviderLoader languageProviderLoader; // Twill: made public
     private final Dist dist;
     private LoadingModList loadingModList;
     private final Path gameDir;
@@ -126,7 +125,7 @@ public final class FMLLoader implements AutoCloseable {
     public BackgroundScanHandler backgroundScanHandler;
     private final boolean production;
     @Nullable
-    private ModuleLayer gameLayer;
+    private ModuleLayer gameLayer = ModuleLayer.boot(); // Twill: We don't have modules
     private final List<ModFile> earlyServicesJars = new ArrayList<>();
     @VisibleForTesting
     DiscoveryResult discoveryResult;
@@ -636,7 +635,8 @@ public final class FMLLoader implements AutoCloseable {
         }
     }
 
-    private void loadPlugins(List<IModFileInfo> plugins) {
+    // Twill: made public
+    public void loadPlugins(List<IModFileInfo> plugins) {
         appendLoader("FML Plugins", plugins.stream().map(mfi -> mfi.getFile().getContents()).toList());
     }
 
@@ -681,7 +681,7 @@ public final class FMLLoader implements AutoCloseable {
 
         var additionalLocators = new ArrayList<IModFileCandidateLocator>();
 
-        additionalLocators.add(new GameLocator());
+        //additionalLocators.add(new GameLocator()); // Twill: Fabric handles this for us
         additionalLocators.add(new InDevFolderLocator());
         additionalLocators.add(new InDevJarLocator());
         //additionalLocators.add(new ModsFolderLocator()); // Twill: we already handle this
@@ -834,7 +834,8 @@ public final class FMLLoader implements AutoCloseable {
         return versionSupportMatrix;
     }
 
-    private class LaunchContextAdapter implements ILaunchContext {
+    // Twill: make public
+    public class LaunchContextAdapter implements ILaunchContext {
         @Override
         public Dist getRequiredDistribution() {
             return dist;

@@ -5,13 +5,14 @@
 
 package net.neoforged.fml.loading;
 
-import com.mojang.logging.LogUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.ModLoadingException;
 import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.javafmlmod.FMLJavaModLanguageProvider;
@@ -40,7 +41,8 @@ public class LanguageProviderLoader {
 
     private record ModLanguageWrapper(IModLanguageLoader modLanguageProvider, ArtifactVersion version) {}
 
-    LanguageProviderLoader(ILaunchContext launchContext) {
+    // Twill: make public
+    public LanguageProviderLoader(ILaunchContext launchContext) {
         languageProviders = ServiceLoaderUtil.loadServices(launchContext, IModLanguageLoader.class);
         ImmediateWindowHandler.updateProgress("Loading language providers");
         languageProviders.forEach(lp -> {

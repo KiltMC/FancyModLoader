@@ -27,6 +27,7 @@ import net.neoforged.neoforgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
+import xyz.bluspring.twill.loader.TwillLoader;
 
 /**
  * Automatic eventbus subscriber - reads {@link EventBusSubscriber}
@@ -51,7 +52,7 @@ public class AutomaticEventSubscriber {
                 LOGGER.debug(LOADING, "Scanning class {} for @SubscribeEvent-annotated methods", ad.clazz().getClassName());
 
                 try {
-                    var clazz = Class.forName(ad.clazz().getClassName(), true, layer.getClassLoader());
+                    var clazz = Class.forName(ad.clazz().getClassName(), true, /*layer.getClassLoader()*/ TwillLoader.class.getClassLoader()); // Twill: no modules, thank you.
 
                     for (Method method : clazz.getDeclaredMethods()) {
                         if (!method.isAnnotationPresent(SubscribeEvent.class)) {

@@ -43,7 +43,7 @@ public class FMLModContainer extends ModContainer {
     private final ModFileScanData scanResults;
     private final IEventBus eventBus;
     private final List<Class<?>> modClasses;
-    private final Module layer;
+//    private final Module layer; // Twill: no modules, thank you.
 
     public FMLModContainer(IModInfo info, List<String> entrypoints, ModFileScanData modFileScanResults, ModuleLayer gameLayer) {
         super(info);
@@ -54,7 +54,7 @@ public class FMLModContainer extends ModContainer {
                 .markerType(IModBusEvent.class)
                 .allowPerPhasePost()
                 .build();
-        this.layer = gameLayer.findModule(info.getOwningFile().getFile().getId()).orElseThrow();
+        //this.layer = gameLayer.findModule(info.getOwningFile().getFile().getId()).orElseThrow(); // Twill: no modules, thank you.
 
         var context = ModLoadingContext.get();
         try {
@@ -64,7 +64,7 @@ public class FMLModContainer extends ModContainer {
 
             for (var entrypoint : entrypoints) {
                 try {
-                    var cls = Class.forName(layer, entrypoint);
+                    var cls = Class.forName(/*layer,*/ entrypoint); // Twill: no modules, thank you.
                     if (cls == null) {
                         throw new ClassNotFoundException("Class '" + entrypoint + "' could not be found");
                     }
@@ -133,7 +133,7 @@ public class FMLModContainer extends ModContainer {
         }
         try {
             LOGGER.trace(LOADING, "Injecting Automatic event subscribers for {}", getModId());
-            AutomaticEventSubscriber.inject(this, this.scanResults, layer);
+            AutomaticEventSubscriber.inject(this, this.scanResults, /*layer*/ null); // Twill: no modules, thank you.
             LOGGER.trace(LOADING, "Completed Automatic event subscribers for {}", getModId());
         } catch (Throwable e) {
             handleMixinError(e);
