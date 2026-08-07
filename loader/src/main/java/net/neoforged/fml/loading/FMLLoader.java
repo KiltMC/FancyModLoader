@@ -67,7 +67,6 @@ import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.fml.loading.moddiscovery.locators.GameLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.InDevFolderLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.InDevJarLocator;
-import net.neoforged.fml.loading.moddiscovery.locators.ModsFolderLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.NeoForgeDevDistCleaner;
 import net.neoforged.fml.loading.modscan.BackgroundScanHandler;
 import net.neoforged.fml.loading.progress.StartupNotificationManager;
@@ -668,7 +667,8 @@ public final class FMLLoader implements AutoCloseable {
         Thread.currentThread().setContextClassLoader(loader);
     }
 
-    private DiscoveryResult runDiscovery() {
+    // Twill: make public and return other data instead
+    public ModDiscoverer.Result runDiscovery() {
         var progress = StartupNotificationManager.prependProgressBar("Discovering mods...", 0);
 
         var additionalLocators = new ArrayList<IModFileCandidateLocator>();
@@ -676,7 +676,7 @@ public final class FMLLoader implements AutoCloseable {
         additionalLocators.add(new GameLocator());
         additionalLocators.add(new InDevFolderLocator());
         additionalLocators.add(new InDevJarLocator());
-        additionalLocators.add(new ModsFolderLocator());
+        //additionalLocators.add(new ModsFolderLocator()); // Twill: we already handle this
 
         var modDiscoverer = new ModDiscoverer(new LaunchContextAdapter(), additionalLocators);
         var discoveryResult = modDiscoverer.discoverMods(earlyServicesJars);
@@ -704,7 +704,7 @@ public final class FMLLoader implements AutoCloseable {
 
         ImmediateWindowHandler.setMinecraftVersion(versionInfo.mcVersion());
         ImmediateWindowHandler.setNeoForgeVersion(versionInfo.neoForgeVersion());
-        return twill$setup(discoveryResult);
+        return discoveryResult;
     }
 
     // Twill: Separate it out so we can set stuff up ourselves
