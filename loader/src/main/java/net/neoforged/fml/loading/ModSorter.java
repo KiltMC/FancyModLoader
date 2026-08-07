@@ -11,9 +11,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
-import com.google.common.graph.GraphBuilder;
-import com.google.common.graph.MutableGraph;
-import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.MutableGraph;
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.ModLoadingException;
 import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
@@ -273,6 +274,9 @@ class ModSorter {
     }
 
     private DependencyResolutionResult verifyDependencyVersions() {
+        if (true) // Twill: We already handle dependency verification ourselves.
+            return new DependencyResolutionResult(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyMap());
+
         var modVersions = modFiles.stream()
                 .map(ModFile::getModInfos)
                 .<IModInfo>mapMulti(Iterable::forEach)
