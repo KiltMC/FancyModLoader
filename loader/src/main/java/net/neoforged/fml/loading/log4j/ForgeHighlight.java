@@ -5,12 +5,14 @@
 
 package net.neoforged.fml.loading.log4j;
 
+/* // Twill: We don't have Minecrell
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.minecrell.terminalconsole.HighlightErrorConverter;
 import net.minecrell.terminalconsole.TerminalConsoleAppender;
+ */
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
@@ -40,6 +42,7 @@ public class ForgeHighlight {
      * @return The new instance
      */
     public static @Nullable HighlightConverter newInstance(Configuration config, String[] options) {
+        /* // Twill: Disable Minecrell
         try {
             Method method = TerminalConsoleAppender.class.getDeclaredMethod("initializeTerminal");
             method.setAccessible(true);
@@ -53,6 +56,7 @@ public class ForgeHighlight {
             optionList.add("disableAnsi=true");
             options = optionList.toArray(new String[0]);
         }
+         */
         return HighlightConverter.newInstance(config, options);
     }
 }

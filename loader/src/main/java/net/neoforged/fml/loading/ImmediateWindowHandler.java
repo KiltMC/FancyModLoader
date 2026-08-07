@@ -26,6 +26,10 @@ public class ImmediateWindowHandler {
     static ImmediateWindowProvider provider;
 
     public static void load(ILaunchContext context, boolean headless, ProgramArgs arguments) {
+        // Twill: We don't want the early display.
+        if (true)
+            return;
+
         if (headless) {
             provider = null;
             LOGGER.info("Not loading early display in headless mode.");
