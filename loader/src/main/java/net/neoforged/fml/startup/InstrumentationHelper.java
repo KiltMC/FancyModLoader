@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import net.neoforged.fml.loading.FMLLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.bluspring.twill.loader.TwillLoader;
 
 /**
  * Facade for obtaining {@link Instrumentation} in {@link FMLLoader}.
@@ -28,6 +29,7 @@ public final class InstrumentationHelper {
         var stackWalker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
         var callingPackage = stackWalker.getCallerClass().getPackageName();
         if (!callingPackage.equals(FMLLoader.class.getPackageName())) {
+            if (!callingPackage.equals(TwillLoader.class.getPackageName())) // Twill: ha, no
             throw new IllegalStateException("This method may only be called by FML");
         }
 

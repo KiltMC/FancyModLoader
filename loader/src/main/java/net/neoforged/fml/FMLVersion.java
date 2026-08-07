@@ -5,10 +5,13 @@
 
 package net.neoforged.fml;
 
+import xyz.bluspring.twill.TwillConstants;
+
 public final class FMLVersion {
     private FMLVersion() {}
 
     public static String getVersion() {
-        return FMLVersionProperties.VERSION;
+        // Twill: Use a custom-defined version
+        return TwillConstants.FML_VERSION;
     }
 }

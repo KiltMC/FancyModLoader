@@ -32,6 +32,10 @@ public class ImmediateWindowHandler {
                     bootstrap.bootstrap(arguments.getArguments()); // TODO: Should take ProgramArgs so it can *remove* args
                 });
 
+        // Twill: We don't want the early display.
+        if (true)
+            return;
+
         if (headless) {
             provider = null;
             LOGGER.info("Not loading early display in headless mode.");

@@ -5,7 +5,6 @@
 
 package net.neoforged.fml.loading.moddiscovery.locators;
 
-import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -25,6 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.ModLoadingException;
 import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.jarcontents.JarContents;
@@ -123,7 +124,8 @@ public class JarInJarDependencyLocator implements IDependencyLocator {
         return Optional.ofNullable(innerModFile);
     }
 
-    private static String extractEmbeddedJarFile(IModFile file, String relativePath, Path destination) {
+    // Twill: Make public
+    public static String extractEmbeddedJarFile(IModFile file, String relativePath, Path destination) {
         try (var inStream = file.getContents().openFile(relativePath); var outStream = Files.newOutputStream(destination)) {
             if (inStream == null) {
                 LOGGER.error("Mod file {} declares Jar-in-Jar {} but does not contain it.", file, relativePath);
@@ -151,7 +153,8 @@ public class JarInJarDependencyLocator implements IDependencyLocator {
      * Atomically moves the extracted embedded jar file to its final location.
      * If an atomic move is not supported, the file will be moved normally.
      */
-    private static void moveExtractedFileIntoPlace(Path source, Path destination) {
+    // Twill: make public
+    public static void moveExtractedFileIntoPlace(Path source, Path destination) {
         try {
             Files.createDirectories(destination.getParent());
         } catch (IOException e) {

@@ -5,13 +5,11 @@
 
 package net.neoforged.fml.loading;
 
-import com.mojang.logging.LogUtils;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 import java.lang.module.Configuration;
-import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -37,13 +35,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.accesstransformer.api.AccessTransformerEngine;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.FMLVersion;
 import net.neoforged.fml.IBindingsProvider;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoader;
-import net.neoforged.fml.ModLoadingException;
 import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.classloading.JarContentsModule;
 import net.neoforged.fml.classloading.JarContentsModuleFinder;
@@ -55,7 +54,6 @@ import net.neoforged.fml.classloading.transformation.TransformingClassLoader;
 import net.neoforged.fml.common.asm.AccessTransformerService;
 import net.neoforged.fml.common.asm.SimpleProcessorsGroup;
 import net.neoforged.fml.common.asm.enumextension.RuntimeEnumExtender;
-import net.neoforged.fml.i18n.FMLTranslations;
 import net.neoforged.fml.jarcontents.CompositeJarContents;
 import net.neoforged.fml.jarcontents.EmptyJarContents;
 import net.neoforged.fml.jarcontents.FolderJarContents;
@@ -90,7 +88,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
+import xyz.bluspring.twill.loader.neoforge.TwillBindings;
 
 public final class FMLLoader implements AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -135,7 +133,7 @@ public final class FMLLoader implements AutoCloseable {
     private final ClassProcessorAuditLog classTransformerAuditLog = new ClassProcessorAuditLog();
     @Nullable
     @VisibleForTesting
-    volatile IBindingsProvider bindings;
+    volatile IBindingsProvider bindings = TwillBindings.INSTANCE; // Twill: Use our own bindings
 
     @ApiStatus.Internal
     public ClassProcessorAuditSource getClassTransformerAuditLog() {
@@ -143,7 +141,7 @@ public final class FMLLoader implements AutoCloseable {
     }
 
     @VisibleForTesting
-    record DiscoveryResult(
+    public record DiscoveryResult(
             List<ModFile> pluginContent,
             List<ModFile> gameContent,
             List<ModFile> gameLibraryContent,
@@ -170,7 +168,8 @@ public final class FMLLoader implements AutoCloseable {
         }
     }
 
-    private FMLLoader(ClassLoader currentClassLoader, String[] programArgs, Dist dist, boolean production, Path gameDir) {
+    // Kilt/Twill: Make public
+    public FMLLoader(ClassLoader currentClassLoader, String[] programArgs, Dist dist, boolean production, Path gameDir) {
         this.currentClassLoader = currentClassLoader;
         this.programArgs = ProgramArgs.from(programArgs);
         this.dist = dist;
@@ -313,12 +312,16 @@ public final class FMLLoader implements AutoCloseable {
         var initialLoader = Objects.requireNonNullElse(startupArgs.parentClassLoader(), ClassLoader.getSystemClassLoader());
 
         PathPrettyPrinting.addRoot(startupArgs.gameDirectory());
+        return twill$create(instrumentation, startupArgs, initialLoader, detectProduction(initialLoader));
+    }
 
+    // Twill: We know our initial class loader and environment
+    public static FMLLoader twill$create(@Nullable Instrumentation instrumentation, StartupArgs startupArgs, ClassLoader initialLoader, boolean isProduction) {
         var loader = new FMLLoader(
                 initialLoader,
                 startupArgs.programArgs(),
                 Objects.requireNonNullElseGet(startupArgs.dist(), () -> detectDist(initialLoader)),
-                detectProduction(initialLoader),
+                isProduction,
                 startupArgs.gameDirectory());
 
         try {
@@ -341,6 +344,8 @@ public final class FMLLoader implements AutoCloseable {
                 ImmediateWindowHandler.setMinecraftVersion(loader.versionInfo.mcVersion());
             }
 
+            // Twill: We handle all of this in Knit
+            /*
             DiscoveryResult discoveryResult;
             if (startupArgs.headless()) {
                 discoveryResult = loader.runDiscovery();
@@ -405,6 +410,7 @@ public final class FMLLoader implements AutoCloseable {
             // Mixin stubbornly loads Mixin Configs via its ModLauncher environment using the TCL.
             // Adding containers beforehand will try to load Mixin configs using the app classloader and fail.
             mixinFacade.finishInitialization(loader.loadingModList, transformingLoader);
+             */
 
             ImmediateWindowHandler.updateProgress("Launching minecraft");
             ImmediateWindowHandler.renderTick();
@@ -420,7 +426,8 @@ public final class FMLLoader implements AutoCloseable {
         }
     }
 
-    private static ClassProcessorSet createClassProcessorSet(StartupArgs startupArgs,
+    // Twill: make public
+    public static ClassProcessorSet createClassProcessorSet(StartupArgs startupArgs,
             LaunchContextAdapter launchContext,
             DiscoveryResult discoveryResult,
             MixinFacade mixinFacade) {
@@ -441,7 +448,9 @@ public final class FMLLoader implements AutoCloseable {
             }
         }
 
+        /* // Twill: We don't have a mixin facade
         builtInProcessors.add(mixinFacade.getClassProcessor());
+         */
 
         return ClassProcessorSet.builder()
                 .markMarker(ClassProcessorIds.SIMPLE_PROCESSORS_GROUP)
@@ -695,7 +704,11 @@ public final class FMLLoader implements AutoCloseable {
 
         ImmediateWindowHandler.setMinecraftVersion(versionInfo.mcVersion());
         ImmediateWindowHandler.setNeoForgeVersion(versionInfo.neoForgeVersion());
+        return twill$setup(discoveryResult);
+    }
 
+    // Twill: Separate it out so we can set stuff up ourselves
+    public DiscoveryResult twill$setup(ModDiscoverer.Result discoveryResult) {
         loadingModList = ModSorter.sort(discoveryResult.modFiles(), discoveryResult.discoveryIssues());
 
         Map<IModInfo, JarResource> enumExtensionsByMod = new HashMap<>();
