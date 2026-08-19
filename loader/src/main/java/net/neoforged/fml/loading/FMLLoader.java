@@ -66,7 +66,6 @@ import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.fml.loading.moddiscovery.locators.InDevFolderLocator;
 import net.neoforged.fml.loading.moddiscovery.locators.InDevJarLocator;
-import net.neoforged.fml.loading.moddiscovery.locators.NeoForgeDevDistCleaner;
 import net.neoforged.fml.loading.modscan.BackgroundScanHandler;
 import net.neoforged.fml.loading.progress.StartupNotificationManager;
 import net.neoforged.fml.startup.InstrumentationHelper;
@@ -442,6 +441,7 @@ public final class FMLLoader implements AutoCloseable {
         builtInProcessors.add(new RuntimeEnumExtender());
         builtInProcessors.add(new SimpleProcessorsGroup());
 
+        /* // Twill: We don't need this
         if (startupArgs.cleanDist()) {
             var minecraftModFile = discoveryResult.gameContent().stream()
                     .filter(mf -> mf.getId().equals("minecraft"))
@@ -452,6 +452,7 @@ public final class FMLLoader implements AutoCloseable {
                 builtInProcessors.add(new NeoForgeDevDistCleaner(minecraftModFile, startupArgs.dist()));
             }
         }
+         */
 
         /* // Twill: We don't have a mixin facade
         builtInProcessors.add(mixinFacade.getClassProcessor());
