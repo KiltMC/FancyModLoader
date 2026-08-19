@@ -22,6 +22,8 @@ import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.i18n.FMLTranslations;
 import net.neoforged.fml.loading.ImmediateWindowHandler;
 import org.jetbrains.annotations.Nullable;
+// Twill: For 26.3 snapshots, TinyFD doesn't actually exist anymore
+//? if < 26.3
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 /**
@@ -136,12 +138,15 @@ public final class FatalErrorReporting {
             message = message.replace('"', '`');
             message = message.replace('\'', '`');
 
+            // Twill: For 26.3 snapshots, TinyFD doesn't actually exist anymore
+            //? if < 26.3 {
             TinyFileDialogs.tinyfd_messageBox(
                     "NeoForge - Fatal Startup Error",
                     message,
                     "ok",
                     "error",
                     1);
+            //? }
         }
         System.exit(1);
     }
