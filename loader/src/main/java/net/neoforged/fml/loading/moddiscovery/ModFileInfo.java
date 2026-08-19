@@ -5,7 +5,6 @@
 
 package net.neoforged.fml.loading.moddiscovery;
 
-import com.mojang.logging.LogUtils;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +14,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.LogMarkers;
 import net.neoforged.fml.loading.StringUtils;
 import net.neoforged.neoforgespi.language.IConfigurable;
@@ -83,6 +84,21 @@ public class ModFileInfo implements IModFileInfo, IConfigurable {
                     this.mods.stream().map(IModInfo::getModId).collect(Collectors.joining(",", "{", "}")),
                     this.mods.stream().map(IModInfo::getVersion).map(Objects::toString).collect(Collectors.joining(",", "{", "}")));
         }
+    }
+
+    // Twill: Copy from existing mod file info.
+    @ApiStatus.Internal
+    public ModFileInfo(IModFileInfo info) {
+        this.config = info.getConfig();
+        this.modFile = new ModFile(info.getFile());
+        this.issueURL = null;
+        this.languageSpecs = info.requiredLanguageLoaders();
+        this.showAsResourcePack = info.showAsResourcePack();
+        this.showAsDataPack = info.showAsDataPack();
+        this.mods = info.getMods();
+        this.properties = info.getFileProperties();
+        this.license = info.getLicense();
+        this.usesServices = info.usesServices();
     }
 
     public ModFileInfo(ModFile file, IConfigurable config, Consumer<IModFileInfo> configFileConsumer, List<LanguageSpec> languageSpecs) {
