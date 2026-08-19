@@ -44,6 +44,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
+import xyz.bluspring.twill.loader.TwillLoader;
 
 /**
  * Contains the logic to load mods, i.e. turn the {@link LoadingModList} into the {@link ModList},
@@ -94,6 +95,9 @@ public final class ModLoader {
                 .<ModContainer>mapMulti(Iterable::forEach)
                 .toList();
         throwIfErrors(modList);
+
+        // Twill: Initialize Fabric mods too
+        TwillLoader.getInstance().loadMods();
 
         modList.setLoadedMods(modContainers);
         ModLoader.modList = modList;

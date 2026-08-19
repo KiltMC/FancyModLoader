@@ -149,7 +149,8 @@ public abstract class ModContainer {
      * 
      * @param e Event to accept
      */
-    public final <T extends Event & IModBusEvent> void acceptEvent(T e) {
+    // Twill: make non-final
+    public <T extends Event & IModBusEvent> void acceptEvent(T e) {
         IEventBus bus = getEventBus();
         if (bus == null) return;
 

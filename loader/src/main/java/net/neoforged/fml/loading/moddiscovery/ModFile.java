@@ -5,8 +5,6 @@
 
 package net.neoforged.fml.loading.moddiscovery;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.lang.module.ModuleDescriptor;
 import java.nio.file.Path;
@@ -21,6 +19,9 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.stream.Stream;
+
+import com.google.common.collect.ImmutableMap;
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.jarcontents.JarContents;
 import net.neoforged.fml.jarmoduleinfo.JarModuleInfo;
 import net.neoforged.fml.loading.FMLLoader;
@@ -108,6 +109,20 @@ public class ModFile implements IModFile {
             this.mixinConfigs = List.of();
             this.accessTransformers = List.of();
         }
+    }
+
+    // Twill: Copy from an implementing interface.
+    @ApiStatus.Internal
+    public ModFile(IModFile existingFile) {
+        this.id = existingFile.getId();
+        this.contents = existingFile.getContents();
+        this.discoveryAttributes = existingFile.getDiscoveryAttributes();
+        this.jarModuleInfo = JarModuleInfo.from(this.contents);
+        this.modFileType = existingFile.getType();
+        this.mixinConfigs = List.of();
+        this.accessTransformers = List.of();
+        this.jarVersion = Optional.ofNullable(this.contents.getManifest().getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION)).orElse("0.0NONE");
+        this.modFileInfo = existingFile.getModFileInfo();
     }
 
     @Override
