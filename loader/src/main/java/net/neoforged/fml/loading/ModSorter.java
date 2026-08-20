@@ -41,6 +41,7 @@ import net.neoforged.neoforgespi.locating.IModFile;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.slf4j.Logger;
+import xyz.bluspring.twill.loader.TwillOverrides;
 
 class ModSorter {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -116,6 +117,15 @@ class ModSorter {
         for (var modFile : ms.modFiles) {
             if (!loadedMods.contains(modFile)) {
                 modFile.close();
+            }
+
+            // Twill: Discard mod definitions that are bridged by Kilt
+            var knitAssociation = modFile.twill$knitAssociation;
+            if (knitAssociation != null && TwillOverrides.getInstance().tryMakeActive(knitAssociation)) {
+                modFile.close();
+                loadedMods.remove(modFile);
+                list.getModFiles().remove(modFile.getModFileInfo());
+                knitAssociation.setShouldScan(false);
             }
         }
 

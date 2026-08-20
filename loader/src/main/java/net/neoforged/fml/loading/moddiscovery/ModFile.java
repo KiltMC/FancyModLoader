@@ -39,6 +39,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+import xyz.bluspring.twill.loader.knit.NeoForgeMod;
 
 @ApiStatus.Internal
 public class ModFile implements IModFile {
@@ -60,6 +61,9 @@ public class ModFile implements IModFile {
     private final List<String> accessTransformers;
     @Nullable
     private CompletableFuture<ModFileScanData> futureScanResult;
+
+    // Twill: Provide a Knit Loader association
+    public @Nullable NeoForgeMod twill$knitAssociation;
 
     public static final Attributes.Name TYPE = new Attributes.Name("FMLModType");
 
