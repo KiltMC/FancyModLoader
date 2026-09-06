@@ -54,6 +54,8 @@ public class ModFileInfo implements IModFileInfo, IConfigurable {
     private final String license;
     private final List<String> usesServices;
 
+    private IModFileInfo kilt$wrapped;
+
     @ApiStatus.Internal
     public ModFileInfo(final ModFile modFile, final IConfigurable config, Consumer<IModFileInfo> configFileConsumer) {
         this.modFile = modFile;
@@ -158,6 +160,7 @@ public class ModFileInfo implements IModFileInfo, IConfigurable {
         this.properties = info.getFileProperties();
         this.license = info.getLicense();
         this.usesServices = info.usesServices();
+        this.kilt$wrapped = info;
     }
 
     public ModFileInfo(final ModFile file, final IConfigurable config, Consumer<IModFileInfo> configFileConsumer, final List<LanguageSpec> languageSpecs) {
@@ -256,11 +259,13 @@ public class ModFileInfo implements IModFileInfo, IConfigurable {
 
     @Override
     public String moduleName() {
+        if (this.kilt$wrapped != null) return this.kilt$wrapped.moduleName();
         return getMods().get(0).getModId();
     }
 
     @Override
     public String versionString() {
+        if (this.kilt$wrapped != null) return this.kilt$wrapped.versionString();
         return getMods().get(0).getVersion().toString();
     }
 
