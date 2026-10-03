@@ -25,7 +25,6 @@ import net.neoforged.neoforgespi.language.IModFileInfo;
 import net.neoforged.neoforgespi.language.IModInfo;
 import org.slf4j.Logger;
 import xyz.bluspring.kilt.Kilt;
-import xyz.bluspring.kilt.loader.mod.fabric.FabricModFileInfoWrapper;
 
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -122,7 +121,8 @@ public class LoadingModList {
             }
 
             if (existingMod.isPresent()) {
-                return new ModFileInfo(new FabricModFileInfoWrapper(existingMod.orElseThrow()));
+                var wrapper = new ModInfo(existingMod.orElseThrow());
+                return new ModFileInfo(wrapper.getOwningFile());
             }
 
             return null;

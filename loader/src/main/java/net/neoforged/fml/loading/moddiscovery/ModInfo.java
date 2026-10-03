@@ -5,7 +5,6 @@
 
 package net.neoforged.fml.loading.moddiscovery;
 
-import com.mojang.logging.LogUtils;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import net.fabricmc.loader.api.ModContainer;
+import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.StringSubstitutor;
 import net.neoforged.fml.loading.StringUtils;
 import net.neoforged.neoforgespi.language.IConfigurable;
@@ -29,6 +28,8 @@ import org.apache.maven.artifact.versioning.VersionRange;
 import org.slf4j.Logger;
 import xyz.bluspring.kilt.loader.mod.NeoForgeMod;
 import xyz.bluspring.kilt.loader.mod.fabric.FabricModFileInfoWrapper;
+
+import net.fabricmc.loader.api.ModContainer;
 
 public class ModInfo implements IModInfo, IConfigurable {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -73,7 +74,9 @@ public class ModInfo implements IModInfo, IConfigurable {
 
     // Kilt: Map to Fabric's loaded info.
     public ModInfo(final ModContainer fabricModContainer) {
-        this.owningFile = new ModFileInfo(new FabricModFileInfoWrapper(fabricModContainer));
+        var wrapper = new FabricModFileInfoWrapper(fabricModContainer);
+        wrapper.setModInfo(this);
+        this.owningFile = new ModFileInfo(wrapper);
         this.modId = fabricModContainer.getMetadata().getId();
         this.namespace = fabricModContainer.getMetadata().getId();
         this.version = new DefaultArtifactVersion(fabricModContainer.getMetadata().getVersion().getFriendlyString());
