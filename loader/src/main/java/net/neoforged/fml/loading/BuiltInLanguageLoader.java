@@ -6,9 +6,9 @@
 package net.neoforged.fml.loading;
 
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import net.neoforged.fml.FMLVersion;
 import net.neoforged.neoforgespi.language.IModLanguageLoader;
 
@@ -21,6 +21,8 @@ public abstract class BuiltInLanguageLoader implements IModLanguageLoader {
         } catch (URISyntaxException e) {
             throw new RuntimeException("Huh?", e);
         }
-        return JarVersionLookupHandler.getVersion(this.getClass()).orElse(Files.isDirectory(lpPath) ? FMLVersion.getVersion() : null);
+        return JarVersionLookupHandler.getVersion(this.getClass())
+            //.orElse(Files.isDirectory(lpPath) ? FMLVersion.getVersion() : null);
+            .orElse(FMLVersion.getVersion()); // Twill: Fallback to our versioning outright.
     }
 }
