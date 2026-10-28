@@ -24,6 +24,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.event.IModBusEvent;
@@ -253,6 +254,10 @@ public final class ModLoader {
 
                 var errorCount = loadingIssues.size() - issueCountBefore;
                 LOGGER.fatal(LOADING, "Failed to wait for future {}, {} errors found", name, errorCount);
+
+                // Twill: Please, log the actual error as it happens, otherwise we do NOT get a proper stack trace for mixin errors.
+                LOGGER.fatal(LOADING, "Twill: Error:", e);
+
                 cancelLoading(modList);
                 throw new ModLoadingException(loadingIssues);
             } catch (Exception ignored) {}
