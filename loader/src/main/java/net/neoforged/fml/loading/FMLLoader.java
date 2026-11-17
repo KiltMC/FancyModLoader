@@ -449,6 +449,7 @@ public final class FMLLoader implements AutoCloseable {
 
         /* // Twill: We don't have a mixin facade
         builtInProcessors.add(mixinFacade.getClassProcessor());
+        builtInProcessors.add(mixinFacade.getGeneratingClassProcessor());
          */
 
         return ClassProcessorSet.builder()
