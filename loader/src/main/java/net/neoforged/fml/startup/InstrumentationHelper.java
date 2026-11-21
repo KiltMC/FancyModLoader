@@ -7,6 +7,8 @@ package net.neoforged.fml.startup;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
+
+import net.lenni0451.reflect.Agents;
 import net.neoforged.fml.loading.FMLLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +71,15 @@ public final class InstrumentationHelper {
             var byteBuddyAgent = Class.forName("net.bytebuddy.agent.ByteBuddyAgent", true, ClassLoader.getSystemClassLoader());
             var instrumentation = (Instrumentation) byteBuddyAgent.getMethod("install").invoke(null);
             LOG.info("Using byte-buddy fallback");
+            return instrumentation;
+        } catch (Exception e) {
+            storedExceptions.add(e);
+        }
+
+        // Twill: Try referring to ASMFabricLoader.
+        try {
+            var instrumentation = Agents.getInstrumentation();
+            LOG.info("[Twill] Using ASMFabricLoader fallback");
             return instrumentation;
         } catch (Exception e) {
             storedExceptions.add(e);
